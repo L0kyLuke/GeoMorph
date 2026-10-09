@@ -1,0 +1,82 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Vite 8.x and @vitejs/plugin-react Incompatibility
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the dependency conflict exists
+  - **Scoped PBT Approach**: Test the concrete failing case - package.json with vite@^8.3.3 and @vitejs/plugin-react@^4.3.0
+  - Create a temporary clean directory
+  - Copy current package.json (with Vite 8.3.3)
+  - Run `npm install --strict-peer-deps` (simulates Vercel's strict mode)
+  - Assert that installation fails with ERESOLVE error mentioning peer dependency conflict
+  - Document the exact error message showing @vitejs/plugin-react requires vite ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 but found 8.3.3
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found: npm install exits with non-zero code, ERESOLVE error in stderr
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 1.3_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Development Workflow Functionality
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on UNFIXED code for development workflows (if they work locally despite Vercel issues)
+  - Write tests capturing observed behavior patterns from Preservation Requirements:
+    - Test that `npm run dev` starts development server successfully
+    - Test that JSX transpilation works (React components render)
+    - Test that `npm run build` completes and generates dist/ output
+    - Test that `npm test` executes and existing tests pass
+    - Test that HMR and fast refresh work during development
+  - Note: If local environment already has compatible versions in node_modules from cache, document baseline behavior
+  - Run tests on UNFIXED code (or document current working state)
+  - **EXPECTED OUTCOME**: Tests PASS if local environment works, or document baseline to preserve
+  - Mark task complete when tests are written and baseline behavior is documented
+  - _Requirements: 3.1, 3.2, 3.3, 3.4_
+
+- [x] 3. Fix Vite version incompatibility
+
+  - [x] 3.1 Downgrade Vite to 5.x LTS in package.json
+    - Change `"vite": "^8.3.3"` to `"vite": "^5.4.11"` in devDependencies
+    - Keep `"@vitejs/plugin-react": "^4.3.0"` unchanged (already compatible with Vite 5.x)
+    - Verify vitest@^5.0.3 compatibility with Vite 5.x (check if downgrade needed)
+    - Delete node_modules/ directory
+    - Delete package-lock.json file
+    - Run `npm install` to regenerate lockfile with compatible versions
+    - Verify no ERESOLVE errors during installation
+    - Run `npm ls vite @vitejs/plugin-react` to confirm resolved versions are compatible
+    - _Bug_Condition: isBugCondition(packageJson) where viteVersion.major >= 8 AND pluginReactVersion.major == 4_
+    - _Expected_Behavior: npm install completes successfully without ERESOLVE errors (Property 1)_
+    - _Preservation: All dev workflows (dev, build, test) work identically (Property 2)_
+    - _Requirements: 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4_
+
+  - [x] 3.2 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Compatible Dependency Installation
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms npm install works without ERESOLVE errors
+    - Create clean directory with fixed package.json (Vite 5.4.11)
+    - Run `npm install --strict-peer-deps`
+    - Assert installation completes successfully (exit code 0, no ERESOLVE in stderr)
+    - **EXPECTED OUTCOME**: Test PASSES (confirms dependency conflict is resolved)
+    - _Requirements: 2.1, 2.2, 2.3_
+
+  - [x] 3.3 Verify preservation tests still pass
+    - **Property 2: Preservation** - Development Workflow Functionality
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run `npm run dev` and verify dev server starts on http://localhost:5173
+    - Verify React components render correctly (JSX transpilation works)
+    - Run `npm run build` and verify dist/ directory is generated
+    - Run `npm test` and verify all existing tests pass
+    - Test HMR: make a change to a component and verify hot reload works
+    - **EXPECTED OUTCOME**: All tests PASS (confirms no regressions in functionality)
+    - _Requirements: 3.1, 3.2, 3.3, 3.4_
+
+- [x] 4. Checkpoint - Ensure all tests pass and Vercel deployment works
+  - Ensure all local tests pass (bug condition test, preservation tests)
+  - Commit changes to git: package.json and package-lock.json
+  - Push to repository to trigger Vercel deployment
+  - Monitor Vercel build logs to confirm npm install succeeds without ERESOLVE errors
+  - Verify Vercel build completes successfully
+  - Verify deployed application works correctly in production
+  - If any issues arise, ask the user for guidance before proceeding
