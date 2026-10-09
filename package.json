@@ -1,0 +1,32 @@
+{
+  "name": "geomorph-coordinate-converter",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Professional coordinate converter web application for DD, UTM, and DMS formats",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest --run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "fastest-levenshtein": "^1.0.16",
+    "file-saver": "^2.0.5",
+    "proj4": "^2.22.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.7",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "@vitest/ui": "^5.0.3",
+    "jsdom": "^24.0.0",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}

@@ -1,0 +1,6 @@
+# Services directory
+This folder will contain service layer modules:
+- ConversionEngine
+- ValidationService
+- ExcelService
+- ColumnDetectionService

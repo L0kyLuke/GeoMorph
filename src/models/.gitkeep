@@ -1,0 +1,7 @@
+# Models directory
+This folder will contain data models and type definitions:
+- DDCoordinate
+- UTMCoordinate
+- DMSCoordinate
+- ConversionConfig
+- ExcelColumnConfig

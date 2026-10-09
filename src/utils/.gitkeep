@@ -1,0 +1,5 @@
+# Utils directory
+This folder will contain utility functions:
+- CoordinateParser
+- Coordinate formatters
+- Helper functions
